@@ -105,7 +105,6 @@ func parseQuote(rdr reader) (List, error) {
 	if err != nil {
 		return List{}, err
 	}
-	//quoteForm := List{Symbol("quote"), quoted}
 	quoteForm := MakeList(Symbol("quote"), quoted)
 	return quoteForm, nil
 }
