@@ -73,32 +73,6 @@ func parseAtom(rdr reader) (LangType, error) {
 	return Symbol(*token), nil
 }
 
-func parseList(rdr reader, open string, close string) (LangType, error) {
-	token := rdr.next()
-	if token == nil || *token != open {
-		return nil, fmt.Errorf("Expected sequence to begin with '%s'", open)
-	}
-
-	seq := make([]LangType, 0)
-	for token = rdr.peek(); true; token = rdr.peek() {
-		if token == nil {
-			return nil, fmt.Errorf("Unbalanced '%s%s'", open, close)
-		}
-		if *token == close {
-			break
-		}
-		form, err := parseForm(rdr)
-		if err != nil {
-			return nil, err
-		}
-		seq = append(seq, form)
-	}
-	// skip over closing delim
-	rdr.next()
-
-	return seq, nil
-}
-
 func parseSequence(rdr reader, open string, close string, seq Sequence) (Sequence, error) {
 	token := rdr.next()
 	if token == nil || *token != open {
