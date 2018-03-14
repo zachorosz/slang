@@ -118,7 +118,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 
 				defval, err = MakeLambda(&env, paramsVec, body)
 			} else {
-				defval, err = Evaluate(operands.Nth(2), env)
+				defval, err = Evaluate(operands.Nth(1), env)
 			}
 
 			if err != nil {
@@ -187,10 +187,10 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 
 			if result == true {
 				// TCO loop to evaluate consequent
-				expr = operands.Nth(2)
+				expr = operands.Nth(1)
 			} else if operands.Len() == 3 {
 				// TCO loop to evaluate alternative if provided
-				expr = operands.Nth(3)
+				expr = operands.Nth(2)
 			} else {
 				return false, nil
 			}

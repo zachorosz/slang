@@ -61,7 +61,7 @@ func (lst List) Rest() Sequence {
 	return rest
 }
 
-// Nth - O(n) - accesses and return the Nth item in the List.
+// Nth - O(n) - accesses and return the Nth (zero-based) item in the List.
 func (lst List) Nth(n Number) LangType {
 	node := lst.head
 	for n < lst.Len() {
@@ -161,15 +161,15 @@ func VectorP(x LangType) bool {
 // Append returns a new copy of Sequence with appended item(s).
 // List append:   O(1)
 // Vector append: O(1) amortized
-// Usage: (append seq item)
+// Usage: `(append seq item)`
 func Append(seq Sequence, item LangType) Sequence {
 	return seq.Append(item)
 }
 
-// Nth returns the nth value of a Sequence.
+// Nth returns the nth (zero-based) value of a Sequence.
 // List access:   O(n)
 // Vector access: O(1)
-// Usage: (nth seq n)
+// Usage: `(nth seq n)`
 func Nth(seq Sequence, n Number) (LangType, error) {
 	if n < 0 || n >= seq.Len() {
 		return nil, fmt.Errorf("Number out of bounds")
