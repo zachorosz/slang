@@ -205,7 +205,7 @@ func MakeVector(first LangType, rest ...LangType) Vector {
 	vec[0] = first
 
 	for i, item := range rest {
-		vec[i] = item
+		vec[i+1] = item
 	}
 
 	return vec
