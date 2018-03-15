@@ -21,9 +21,9 @@ func (env *Env) Get(symbol Symbol) (LangType, error) {
 	return nil, fmt.Errorf("Symbol '%s' is undefined", symbol)
 }
 
-// Set adds a new symbol definition to the environment. If symbol is already defined, an error is
+// Define adds a new symbol definition to the environment. If symbol is already defined, an error is
 // returned; use the Mutate method to change the definition of a symbol.
-func (env *Env) Set(symbol Symbol, value LangType) error {
+func (env *Env) Define(symbol Symbol, value LangType) error {
 	if _, exists := env.Frame[symbol]; !exists {
 		env.Frame[symbol] = value
 		return nil
