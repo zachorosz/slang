@@ -151,7 +151,6 @@ func (s Str) Modulo(obj Algebraic) (Algebraic, error) {
 
 // Subroutine a slang function that is implemented in the host language, Go!
 type Subroutine struct {
-	Name string
 	Func func(...LangType) (LangType, error)
 }
 

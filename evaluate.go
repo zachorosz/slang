@@ -37,15 +37,15 @@ func evaluateVectorItems(vec Vector, env Env) (Vector, error) {
 // expression is returned to be evaluated.
 func evaluateBodyTCO(lst List, env Env) (LangType, error) {
 	tailN := lst.len - 1
-	head := lst.head
+	node := lst.head
 	for n := 0; n < tailN; n++ {
-		_, err := Evaluate(head.value, env)
+		_, err := Evaluate(node.value, env)
 		if err != nil {
 			return nil, err
 		}
-		head = lst.head.next
+		node = node.next
 	}
-	return lst.tail, nil
+	return lst.tail.value, nil
 }
 
 func evaluateExpr(expr LangType, env Env) (LangType, error) {
@@ -125,7 +125,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 				return nil, err
 			}
 
-			env.Set(defsym, defval)
+			env.Define(defsym, defval)
 
 			return defval, nil
 		case "lambda":
@@ -218,7 +218,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 				// perform left to right bindings of lambda arguments
 				for i, bindValue := range args {
 					bindSymbol := lambda.Args[i].(Symbol)
-					env.Set(bindSymbol, bindValue)
+					env.Define(bindSymbol, bindValue)
 				}
 
 				// evaluate all items in body except the final expression

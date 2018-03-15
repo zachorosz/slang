@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+var (
+	tokenRegex = regexp.MustCompile(`[()\[\]']|;.*|"(?:\\.|[^\\"])*"|[^\s()\[\]']*`)
+)
+
 type reader interface {
 	peek() *string
 	next() *string
@@ -34,9 +38,9 @@ func (rdr *tokenReader) next() *string {
 }
 
 func tokenize(expr string) []string {
-	r := regexp.MustCompile(`[()\[\]']|;.*|"(?:\\.|[^\\"])*"|[^\s()']*`)
-	tokens := make([]string, 0)
-	for _, token := range r.FindAllString(strings.TrimSpace(expr), -1) {
+	tokens := []string{}
+	for _, token := range tokenRegex.FindAllString(strings.TrimSpace(expr), -1) {
+		// ignore comments
 		if !strings.HasPrefix(token, ";") {
 			tokens = append(tokens, token)
 		}

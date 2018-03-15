@@ -20,12 +20,6 @@ type Comparable interface {
 	LessThanOrEqualTo(obj Comparable) (bool, error)
 }
 
-// Not negates a boolean value.
-// Usage: (nil? pred)
-func Not(pred bool) bool {
-	return !pred
-}
-
 // Gt is a conditional operator that returns true if lhs is greater than rhs.
 // Usage: `(> x y)`
 func Gt(lhs Comparable, rhs Comparable) (LangType, error) {
