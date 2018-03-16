@@ -64,9 +64,9 @@ func (lst List) Rest() Sequence {
 // Nth - O(n) - accesses and return the Nth (zero-based) item in the List.
 func (lst List) Nth(n Number) LangType {
 	node := lst.head
-	for n < lst.Len() {
+	N := int(n)
+	for i := 0; i < N; i++ {
 		node = node.next
-		n++
 	}
 	return node.value
 }
