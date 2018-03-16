@@ -50,8 +50,6 @@ func evaluateBodyTCO(lst List, env Env) (LangType, error) {
 
 func evaluateExpr(expr LangType, env Env) (LangType, error) {
 	switch t := expr.(type) {
-	case List:
-		return evaluateListItems(t, env)
 	case Vector:
 		return evaluateVectorItems(t, env)
 	case Symbol:
@@ -197,33 +195,32 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 			// loop to evaluate consequent or alternative
 		default:
 			// evaluate all items in form (list); first should be an applicable procedure/lambda
-			e, err := evaluateExpr(form, env)
+			values, err := evaluateListItems(form, env)
 			if err != nil {
 				return nil, err
 			}
 
-			values := e.([]LangType)
 			procedure := values[0]
 			args := values[1:]
 
 			// apply lambda or subroutine
 			if lambda, isLambda := procedure.(Lambda); isLambda {
-				if len(args) != len(lambda.Args) {
+				if len(args) != len(lambda.params) {
 					return nil, fmt.Errorf("Incorrect number of arguments to apply lambda")
 				}
 
 				// modify env to reference the lambda's closure
-				env = lambda.Closure
+				env = lambda.closure
 
 				// perform left to right bindings of lambda arguments
 				for i, bindValue := range args {
-					bindSymbol := lambda.Args[i].(Symbol)
+					bindSymbol := lambda.params[i].(Symbol)
 					env.Define(bindSymbol, bindValue)
 				}
 
 				// evaluate all items in body except the final expression
 				// last expression is set in for next TCO loop iteration to evaluate it
-				expr, err = evaluateBodyTCO(lambda.Body, env)
+				expr, err = evaluateBodyTCO(lambda.body, env)
 				if err != nil {
 					return nil, err
 				}

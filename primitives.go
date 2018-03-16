@@ -159,11 +159,11 @@ func (subr Subroutine) Apply(args ...LangType) (LangType, error) {
 	return subr.Func(args...)
 }
 
-// Lambda a slang function type.
+// Lambda a slang function type. Use MakeLambda to construct a Lambda.
 type Lambda struct {
-	Args    Vector
-	Body    List
-	Closure Env
+	params  Vector
+	body    List
+	closure Env
 }
 
 func (lambda Lambda) String() string {
@@ -218,16 +218,16 @@ func SymbolP(x LangType) bool {
 // environment frame (A.K.A. closure) and the body is evaluated. The evaluation of the final, or
 // only, expression in the body is used as the return value.
 // Usage: `(lambda [params...] body...)`
-func MakeLambda(env *Env, args Vector, body List) (Lambda, error) {
+func MakeLambda(env *Env, params Vector, body List) (Lambda, error) {
 	if body.Len() == 0 {
 		return Lambda{}, fmt.Errorf("Lambda body expected")
 	}
+
+	closure := MakeClosure(env)
+
 	return Lambda{
-		Args: args,
-		Body: body,
-		Closure: Env{
-			EnclosingFrame: env,
-			Frame:          make(map[Symbol]LangType, int(args.Len())),
-		},
+		params:  params,
+		body:    body,
+		closure: closure,
 	}, nil
 }
