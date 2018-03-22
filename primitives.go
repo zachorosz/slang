@@ -24,7 +24,7 @@ func (n Number) Plus(obj Algebraic) (Algebraic, error) {
 	case Number:
 		return n + t, nil
 	case Str:
-		return Str(fmt.Sprintf("%s%v", n, t)), nil
+		return Str(fmt.Sprint(n)) + t, nil
 	default:
 		return nil, fmt.Errorf("Cannot add number and %T", t)
 	}
