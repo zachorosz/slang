@@ -41,7 +41,7 @@ func tokenize(expr string) []string {
 	tokens := []string{}
 	for _, token := range tokenRegex.FindAllString(strings.TrimSpace(expr), -1) {
 		// ignore comments
-		if !strings.HasPrefix(token, ";") {
+		if !strings.HasPrefix(token, ";") && token != "" {
 			tokens = append(tokens, token)
 		}
 	}
@@ -145,4 +145,18 @@ func Read(expr string) (LangType, error) {
 		return nil, err
 	}
 	return AST, nil
+}
+
+func ReadAll(expr string) ([]LangType, error) {
+	tokens := tokenize(expr)
+	reader := &tokenReader{tokens, 0}
+	expressions := []LangType{}
+	for reader.peek() != nil {
+		expr, err := parseForm(reader)
+		if err != nil {
+			return nil, err
+		}
+		expressions = append(expressions, expr)
+	}
+	return expressions, nil
 }
