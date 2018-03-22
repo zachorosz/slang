@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/c-bata/go-prompt"
@@ -19,7 +20,8 @@ var (
 )
 
 var (
-	env = slang.MakeEnv()
+	program = ""
+	env     = slang.MakeEnv(nil)
 )
 
 func usage() {
@@ -62,18 +64,43 @@ func runREPL() {
 	}
 }
 
+func readFile(filename string) string {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return string(b)
+}
+
 func main() {
+	var argc int
+	var args []string
+
 	flag.Usage = usage
 	flag.Parse()
 
 	if flag.NFlag() > 1 {
-		flag.Usage()
+		flag.Usage() // Exit(2)
 	}
 
-	narg := slang.Number(flag.NArg())
-	argv := make(slang.Vector, flag.NArg())
-	for i, arg := range flag.Args() {
-		argv[i] = arg
+	// filename passed as argument
+	if flag.NFlag() == 0 && flag.NArg() > 0 {
+		var filename = flag.Arg(0)
+		contents := readFile(filename)
+		program = contents
+
+		args = flag.Args()[1:]
+		argc = len(args)
+	} else {
+		argc = flag.NArg()
+		args = flag.Args()
+	}
+
+	narg := slang.Number(argc)
+	argv := make(slang.Vector, argc)
+	for i, arg := range args {
+		argv[i] = slang.Str(arg)
 	}
 
 	env.UseSubrPackage("", subroutines.Primitives)
@@ -84,6 +111,20 @@ func main() {
 		ok := readEvaluatePrint(*expression)
 		if !ok {
 			os.Exit(1)
+		}
+	} else if program != "" {
+		expressions, err := slang.ReadAll(program)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		for _, expr := range expressions {
+			v, err := slang.Evaluate(expr, env)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			fmt.Println(v)
 		}
 	} else {
 		runREPL()
