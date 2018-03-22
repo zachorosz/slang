@@ -24,7 +24,7 @@ func (n Number) Plus(obj Algebraic) (Algebraic, error) {
 	case Number:
 		return n + t, nil
 	case Str:
-		return Str(fmt.Sprintf("%s%s", n, t)), nil
+		return Str(fmt.Sprintf("%s%v", n, t)), nil
 	default:
 		return nil, fmt.Errorf("Cannot add number and %T", t)
 	}
@@ -111,6 +111,8 @@ func (s Str) String() string {
 // Concatenating a non-string uses the default format verb from the fmt package.
 func (s Str) Plus(obj Algebraic) (Algebraic, error) {
 	switch t := obj.(type) {
+	case Str:
+		return s + t, nil
 	default:
 		return s + Str(fmt.Sprint(t)), nil
 	}
@@ -161,9 +163,9 @@ func (subr Subroutine) Apply(args ...LangType) (LangType, error) {
 
 // Lambda a slang function type. Use MakeLambda to construct a Lambda.
 type Lambda struct {
-	params  Vector
-	body    List
-	closure Env
+	params Vector
+	body   List
+	env    Env
 }
 
 func (lambda Lambda) String() string {
@@ -218,16 +220,14 @@ func SymbolP(x LangType) bool {
 // environment frame (A.K.A. closure) and the body is evaluated. The evaluation of the final, or
 // only, expression in the body is used as the return value.
 // Usage: `(lambda [params...] body...)`
-func MakeLambda(env *Env, params Vector, body List) (Lambda, error) {
+func MakeLambda(env Env, params Vector, body List) (Lambda, error) {
 	if body.Len() == 0 {
 		return Lambda{}, fmt.Errorf("Lambda body expected")
 	}
 
-	closure := MakeClosure(env)
-
 	return Lambda{
-		params:  params,
-		body:    body,
-		closure: closure,
+		params: params,
+		body:   body,
+		env:    env,
 	}, nil
 }
