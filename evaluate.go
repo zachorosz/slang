@@ -114,7 +114,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 					return nil, fmt.Errorf("Second argument must be a vector for procedure definition")
 				}
 
-				defval, err = MakeLambda(&env, paramsVec, body)
+				defval, err = MakeLambda(env, paramsVec, body)
 			} else {
 				defval, err = Evaluate(operands.Nth(1), env)
 			}
@@ -141,7 +141,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 
 			body := operands.Rest().(List)
 
-			return MakeLambda(&env, params, body)
+			return MakeLambda(env, params, body)
 		case "quote":
 			operands := form.Rest()
 
@@ -210,7 +210,7 @@ func Evaluate(expr LangType, env Env) (LangType, error) {
 				}
 
 				// modify env to reference the lambda's closure
-				env = lambda.closure
+				env = MakeEnv(&lambda.env)
 
 				// perform left to right bindings of lambda arguments
 				for i, bindValue := range args {

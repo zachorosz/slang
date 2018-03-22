@@ -6,20 +6,21 @@ import (
 
 // Env environment with scopes and reference to enclosing frame
 type Env struct {
-	enclosingFrame *Env
-	frame          map[Symbol]LangType
+	outer *Env
+	frame map[Symbol]LangType
 }
 
 // Get performs a symbol lookup. If the symbol key is not present in the current
 // or any enclosing frame, an undefined symbol error is returned.
 func (env *Env) Get(symbol Symbol) (LangType, error) {
-	currentEnv := env
-	for currentEnv != nil {
-		if value, exists := currentEnv.frame[symbol]; exists {
-			return value, nil
-		}
-		currentEnv = currentEnv.enclosingFrame
+	if value, exists := env.frame[symbol]; exists {
+		return value, nil
 	}
+
+	if env.outer != nil {
+		return env.outer.Get(symbol)
+	}
+
 	return nil, fmt.Errorf("Symbol '%s' is undefined", symbol)
 }
 
@@ -56,14 +57,10 @@ func (env *Env) UseSubrPackage(pkgName string,
 }
 
 // MakeEnv constructs an empty environment.
-func MakeEnv() Env {
+func MakeEnv(outer *Env) Env {
 	frame := map[Symbol]LangType{}
-	return Env{frame: frame}
-}
-
-// MakeClosure encloses an environment over a new environment.
-func MakeClosure(enclosingEnv *Env) Env {
-	env := MakeEnv()
-	env.enclosingFrame = enclosingEnv
-	return env
+	return Env{
+		outer: outer,
+		frame: frame,
+	}
 }
