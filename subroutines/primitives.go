@@ -208,6 +208,26 @@ var Primitives = map[string]func(...slang.LangType) (slang.LangType, error){
 		}
 		return seq.Append(args[1]), nil
 	},
+	"first": func(args ...slang.LangType) (slang.LangType, error) {
+		if len(args) != 1 {
+			return nil, fmt.Errorf("Incorrect number of arguments - expected 1 arguments")
+		}
+		seq, isSeq := args[0].(slang.Sequence)
+		if !isSeq {
+			return nil, fmt.Errorf("%s is not a sequence", args[0])
+		}
+		return seq.First(), nil
+	},
+	"rest": func(args ...slang.LangType) (slang.LangType, error) {
+		if len(args) != 1 {
+			return nil, fmt.Errorf("Incorrect number of arguments - expected 1 arguments")
+		}
+		seq, isSeq := args[0].(slang.Sequence)
+		if !isSeq {
+			return nil, fmt.Errorf("%s is not a sequence", args[0])
+		}
+		return seq.Rest(), nil
+	},
 	"nth": func(args ...slang.LangType) (slang.LangType, error) {
 		if len(args) != 2 {
 			return nil, fmt.Errorf("Incorrect number of arguments - expected 2 arguments")
