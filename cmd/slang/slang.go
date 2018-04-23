@@ -8,7 +8,6 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/zachorosz/slang"
-	"github.com/zachorosz/slang/subroutines"
 )
 
 const (
@@ -103,7 +102,7 @@ func main() {
 		argv[i] = slang.Str(arg)
 	}
 
-	env.UseSubrPackage("", subroutines.Primitives)
+	env.UseSubrPackage("", Primitives)
 	env.Define(slang.Symbol("*ARGV*"), argv)
 	env.Define(slang.Symbol("*NARG*"), narg)
 

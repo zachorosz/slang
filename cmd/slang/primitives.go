@@ -1,15 +1,10 @@
-package subroutines
+package main
 
 import (
 	"fmt"
 
 	"github.com/zachorosz/slang"
 )
-
-// TODO(zachorosz): make this less obsurd to setup, especially for external users wishing to
-// implement slang subroutines in go.
-// Potentially make use of https://golang.org/pkg/plugin/ to import go plugins at runtime using
-// some sort of standard API for slang subroutines. Will be sweet
 
 // Primitives is a map with applications of slang primitives.
 //
