@@ -52,7 +52,7 @@ $ slang /path/to/my-program.sl
 
 Any additional arguments are treated as program arguments. Using `*ARGV*` in your program will allow you to interact with the arguments Vector.
 
-## Some very usful resources
+## Some very useful resources
 
 1. [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html) by Gerald Jay Sussman and Hal Abelson
 2. [kanaka's Make a Lisp](https://github.com/kanaka/mal) - parsing and tail-call optimization
