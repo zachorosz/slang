@@ -137,6 +137,18 @@ func (vec Vector) String() string {
 	return fmt.Sprintf("[%s]", items)
 }
 
+// NilP is a predicate that returns true if object is nil or an empty list.
+// Usage: `(nil? x)`
+func NilP(x LangType) bool {
+	if x == nil {
+		return true
+	}
+	if list, isList := x.(List); isList {
+		return list.Len() == 0
+	}
+	return false
+}
+
 // SequenceP return true if object is a Sequence.
 // Usage: `(seq? x)`
 func SequenceP(x LangType) bool {
