@@ -16,18 +16,54 @@ var lexTests = []struct {
 	input  string
 	tokens []token
 }{
-	{"text with left paren", "(", []token{leftParenToken, eofToken}},
-	{"text with right paren", ")", []token{rightParenToken, eofToken}},
-	{"text with left and right paren", "()", []token{leftParenToken, rightParenToken, eofToken}},
-	{"text with left bracket", "[", []token{leftBracketToken, eofToken}},
-	{"text with right bracket", "]", []token{rightBracketToken, eofToken}},
-	{"text with quote", "'", []token{quoteToken, eofToken}},
-	{"text with string", "\"hello world\"", []token{token{typ: tokenString, literal: "hello world"}, eofToken}},
-	{"text with empty string", "\"\"", []token{token{typ: tokenString, literal: ""}, eofToken}},
-	{"text with string with escaped chars", "\"hello\\n\\\"world\\\"\"", []token{token{typ: tokenString, literal: "hello\\n\\\"world\\\""}, eofToken}},
-	{"text with comment", "; this is a comment!", []token{eofToken}},
-	{"text with comment delimited by newline", "; an empty list\n'()", []token{quoteToken, leftParenToken, rightParenToken, eofToken}},
-	{"text with all whitespace", "    \t   \t\t", []token{eofToken}},
+	{"parens", "()", []token{leftParenToken, rightParenToken, eofToken}},
+	{"brackets", "[]", []token{leftBracketToken, rightBracketToken, eofToken}},
+	{"quote", "'()", []token{quoteToken, leftParenToken, rightParenToken, eofToken}},
+	{"string", "\"hello world\"", []token{
+		token{typ: tokenString, literal: "hello world"},
+		eofToken,
+	}},
+	{"empty string", "\"\"", []token{token{typ: tokenString, literal: ""}, eofToken}},
+	{"string with escaped chars", "\"hello\\n\\\"world\\\"\"", []token{
+		token{typ: tokenString, literal: "hello\\n\\\"world\\\""},
+		eofToken,
+	}},
+	{"comment", "; this is a comment!", []token{eofToken}},
+	{"comment delimited by newline", "; an empty list\n'()", []token{
+		quoteToken,
+		leftParenToken,
+		rightParenToken,
+		eofToken,
+	}},
+	{"whitespace", " \t", []token{eofToken}},
+	{"symbols", "! $ % & * _ + - = < > ? / thisIs-a_symbol!", []token{
+		token{typ: tokenSymbol, literal: "!"},
+		token{typ: tokenSymbol, literal: "$"},
+		token{typ: tokenSymbol, literal: "%"},
+		token{typ: tokenSymbol, literal: "&"},
+		token{typ: tokenSymbol, literal: "*"},
+		token{typ: tokenSymbol, literal: "_"},
+		token{typ: tokenSymbol, literal: "+"},
+		token{typ: tokenSymbol, literal: "-"},
+		token{typ: tokenSymbol, literal: "="},
+		token{typ: tokenSymbol, literal: "<"},
+		token{typ: tokenSymbol, literal: ">"},
+		token{typ: tokenSymbol, literal: "?"},
+		token{typ: tokenSymbol, literal: "/"},
+		token{typ: tokenSymbol, literal: "thisIs-a_symbol!"},
+		eofToken,
+	}},
+	{"numbers", "1 0xd3ADb33f -1.2i 1.2i 1e3 +1.2e-4 0.1234 1+2i", []token{
+		token{typ: tokenNumber, literal: "1"},
+		token{typ: tokenNumber, literal: "0xd3ADb33f"},
+		token{typ: tokenNumber, literal: "-1.2i"},
+		token{typ: tokenNumber, literal: "1.2i"},
+		token{typ: tokenNumber, literal: "1e3"},
+		token{typ: tokenNumber, literal: "+1.2e-4"},
+		token{typ: tokenNumber, literal: "0.1234"},
+		token{typ: tokenComplexNumber, literal: "1+2i"},
+		eofToken,
+	}},
 }
 
 func equal(expected, got []token) bool {
@@ -62,7 +98,7 @@ func TestLex(t *testing.T) {
 		l := lex(test.name, test.input)
 		got := collect(l)
 		if !equal(test.tokens, got) {
-			t.Errorf("%s: got %+v expected %v", test.name, got, test.tokens)
+			t.Errorf("\n%s:\n\tgot %+v\n\texp %v", test.name, got, test.tokens)
 		}
 	}
 }
