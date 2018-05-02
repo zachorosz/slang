@@ -66,15 +66,15 @@ var lexTests = []struct {
 	}},
 }
 
-func equal(expected, got []token) bool {
-	if len(expected) != len(got) {
+func equal(t1, t2 []token) bool {
+	if len(t1) != len(t2) {
 		return false
 	}
-	for i := range expected {
-		if expected[i].typ != got[i].typ {
+	for i := range t1 {
+		if t1[i].typ != t2[i].typ {
 			return false
 		}
-		if expected[i].literal != got[i].literal {
+		if t1[i].literal != t2[i].literal {
 			return false
 		}
 	}
