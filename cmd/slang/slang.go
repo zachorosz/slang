@@ -8,6 +8,7 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/zachorosz/slang"
+	"github.com/zachorosz/slang/parser"
 )
 
 const (
@@ -16,11 +17,8 @@ const (
 
 var (
 	expression = flag.String("e", "", "Evaluate expression and print")
-)
-
-var (
-	program = ""
-	env     = slang.MakeEnv(nil)
+	program    = ""
+	env        = slang.MakeEnv(nil)
 )
 
 func usage() {
@@ -30,15 +28,15 @@ func usage() {
 }
 
 func readEvaluatePrint(sexpr string) bool {
-	expr, err := slang.Read(sexpr)
+	expr, err := parser.Parse("REPL", sexpr)
 	if err != nil {
-		fmt.Printf("Read Error: %s\n", err)
+		fmt.Printf("%s\n", err)
 		return false
 	}
 
-	result, err := slang.Evaluate(expr, env)
+	result, err := slang.Evaluate(expr[0], env)
 	if err != nil {
-		fmt.Printf("Eval Error: %s\n", err)
+		fmt.Printf("%s\n", err)
 		return false
 	}
 
@@ -72,10 +70,19 @@ func readFile(filename string) string {
 	return string(b)
 }
 
-func main() {
-	var argc int
-	var args []string
+func setupEnv(env *slang.Env, argc int, args []string) {
+	narg := slang.Number(argc)
+	argv := make(slang.Vector, argc)
+	for i, arg := range args {
+		argv[i] = slang.Str(arg)
+	}
 
+	env.UseSubrPackage("", Primitives)
+	env.Define(slang.Symbol("*ARGV*"), argv)
+	env.Define(slang.Symbol("*NARG*"), narg)
+}
+
+func main() {
 	flag.Usage = usage
 	flag.Parse()
 
@@ -86,38 +93,19 @@ func main() {
 	// filename passed as argument
 	if flag.NFlag() == 0 && flag.NArg() > 0 {
 		var filename = flag.Arg(0)
-		contents := readFile(filename)
-		program = contents
+		program = readFile(filename)
 
-		args = flag.Args()[1:]
-		argc = len(args)
-	} else {
-		argc = flag.NArg()
-		args = flag.Args()
-	}
+		args := flag.Args()[1:]
+		argc := len(args)
+		setupEnv(&env, argc, args)
 
-	narg := slang.Number(argc)
-	argv := make(slang.Vector, argc)
-	for i, arg := range args {
-		argv[i] = slang.Str(arg)
-	}
-
-	env.UseSubrPackage("", Primitives)
-	env.Define(slang.Symbol("*ARGV*"), argv)
-	env.Define(slang.Symbol("*NARG*"), narg)
-
-	if *expression != "" {
-		ok := readEvaluatePrint(*expression)
-		if !ok {
-			os.Exit(1)
-		}
-	} else if program != "" {
-		expressions, err := slang.ReadAll(program)
+		exprs, err := parser.Parse(filename, program)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		for _, expr := range expressions {
+
+		for _, expr := range exprs {
 			v, err := slang.Evaluate(expr, env)
 			if err != nil {
 				fmt.Println(err)
@@ -126,7 +114,17 @@ func main() {
 			fmt.Println(v)
 		}
 	} else {
-		runREPL()
+		// run REPL or evaluate expression passed via -e flag
+		setupEnv(&env, flag.NArg(), flag.Args())
+
+		if *expression != "" {
+			ok := readEvaluatePrint(*expression)
+			if !ok {
+				os.Exit(1)
+			}
+		} else {
+			runREPL()
+		}
 	}
 
 	os.Exit(0)
