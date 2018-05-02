@@ -1,3 +1,5 @@
+// Package parser lexically analyzes and parses slang S-expression input. This package is based on
+// Rob Pike's talk "Lexical Scanning in Go" (https://www.youtube.com/watch?v=HxaD_trXwRE).
 package parser
 
 import (
