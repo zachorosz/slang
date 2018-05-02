@@ -118,6 +118,12 @@ var Primitives = map[string]func(...slang.LangType) (slang.LangType, error){
 
 		return slang.Lte(lhs, rhs)
 	},
+	"=": func(args ...slang.LangType) (slang.LangType, error) {
+		if len(args) != 2 {
+			return nil, fmt.Errorf("Incorrect number of arguments - expected 2 arguments")
+		}
+		return slang.Eq(args[0], args[1]), nil
+	},
 	"+": func(args ...slang.LangType) (slang.LangType, error) {
 		if len(args) != 2 {
 			return nil, fmt.Errorf("Incorrect number of arguments - expected 2 arguments")
