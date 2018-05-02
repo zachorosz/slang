@@ -117,6 +117,12 @@ func (l *lexer) emit(t tokenType) {
 	l.start = l.pos
 }
 
+// errorf emits an error and stops lexing by returning a nil state pointer
+func (l *lexer) errorf(format string, args ...interface{}) stateFn {
+	l.tokens <- token{tokenError, fmt.Sprintf(format, args...), l.pos, l.line}
+	return nil
+}
+
 // run scans and lexes input by executing state functions until the next state is nil.
 // The initial state is lexText.
 func (l *lexer) run() {
@@ -127,8 +133,16 @@ func (l *lexer) run() {
 	close(l.tokens)
 }
 
+// nextToken returns the next token to be processed.
 func (l *lexer) nextToken() token {
 	return <-l.tokens
+}
+
+// flush flushes token output so that the goroutine will exit.
+// call this if there are errors that the lexer can't catch during parsing
+func (l *lexer) flush() {
+	for range l.tokens {
+	}
 }
 
 // lex creates a new scanner for the input string.
@@ -183,7 +197,7 @@ Loop:
 			}
 			fallthrough
 		case r == eof:
-			panic("unterminated string")
+			return l.errorf("Unterminated string")
 		case r == '"':
 			// backup to not emit string with ending '"'
 			l.backup()
@@ -224,7 +238,7 @@ func lexWhiteSpace(l *lexer) stateFn {
 // REFERENCE: https://golang.org/src/text/template/parse/lex.go line 545
 func lexNumber(l *lexer) stateFn {
 	if !l.scanNumber() {
-		return nil
+		return l.errorf("Invalid number")
 	}
 
 	// check case where only + or - was accepted.
@@ -239,7 +253,7 @@ func lexNumber(l *lexer) stateFn {
 	if sign := l.peek(); sign == '+' || sign == '-' {
 		// check for complex number like 1+2i.
 		if !l.scanNumber() || l.input[l.pos-1] != 'i' {
-			return nil
+			return l.errorf("Invalid complex number")
 		}
 		l.emit(tokenComplexNumber)
 	} else {
@@ -316,7 +330,7 @@ func lexText(l *lexer) stateFn {
 		case isSymbolic(r):
 			return lexSymbol
 		default:
-			panic(fmt.Sprintf("unknown rune %q", r))
+			return l.errorf("unknown rune %q", r)
 		}
 	}
 }
