@@ -56,3 +56,4 @@ Any additional arguments are treated as program arguments. Using `*ARGV*` in you
 
 1. [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sicp/full-text/book/book.html) by Gerald Jay Sussman and Hal Abelson
 2. [kanaka's Make a Lisp](https://github.com/kanaka/mal) - parsing and tail-call optimization
+3. Rob Pike's "Lexical Scanning in Go" talk - [video](https://www.youtube.com/watch?v=HxaD_trXwRE), [slides](https://talks.golang.org/2011/lex.slide#1)

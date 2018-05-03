@@ -2,6 +2,7 @@ package slang
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -181,6 +182,10 @@ func (subr Subroutine) Apply(args ...LangType) (LangType, error) {
 	return subr.Func(args...)
 }
 
+func (subr Subroutine) String() string {
+	return "<procedure>"
+}
+
 // Lambda a slang function type. Use MakeLambda to construct a Lambda.
 type Lambda struct {
 	params Vector
@@ -189,7 +194,7 @@ type Lambda struct {
 }
 
 func (lambda Lambda) String() string {
-	return fmt.Sprintf("<procedure>")
+	return "<procedure>"
 }
 
 // MakeLambda makes a new Lambda function with N-arity. When applied, arguments are bound to its
@@ -229,7 +234,7 @@ func ProcedureP(x LangType) bool {
 // StringP returns true if object is a string.
 // Usage: `(string? x)`
 func StringP(x LangType) bool {
-	_, isString := x.(string)
+	_, isString := x.(Str)
 	return isString
 }
 
@@ -238,6 +243,45 @@ func StringP(x LangType) bool {
 func SymbolP(x LangType) bool {
 	_, isSymbol := x.(Symbol)
 	return isSymbol
+}
+
+// Eq is a conditional operator that returns true if lhs is equal to rhs. If lhs and rhs are
+// sequences, their items are compared one-to-one for equality.
+// Usage: `(= x y)`
+func Eq(lhs, rhs LangType) bool {
+	if reflect.TypeOf(lhs) != reflect.TypeOf(rhs) {
+		return false
+	}
+	switch t1 := lhs.(type) {
+	case List:
+		t2 := rhs.(List)
+		if t1.Len() != t2.Len() {
+			return false
+		}
+		t1Node := t1
+		t2Node := t2
+		for t1Node.Len() > 0 {
+			if !Eq(t1Node.First(), t2Node.First()) {
+				return false
+			}
+			t1Node = t1Node.Rest().(List)
+			t2Node = t2Node.Rest().(List)
+		}
+		return true
+	case Vector:
+		t2 := rhs.(Vector)
+		if t1.Len() != t2.Len() {
+			return false
+		}
+		for i, item := range t1 {
+			if !Eq(item, t2[i]) {
+				return false
+			}
+		}
+		return true
+	default:
+		return lhs == rhs
+	}
 }
 
 // Gt is a conditional operator that returns true if lhs is greater than rhs.
